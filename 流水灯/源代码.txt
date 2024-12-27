@@ -1,0 +1,109 @@
+`timescale 1ns / 1ps
+//////////////////////////////////////////////////////////////////////////////////
+// Company:
+// Engineer:
+//
+// Create Date:    20:52:20 01/01/2024
+// Design Name:
+// Module Name:    W2
+// Project Name:
+// Target Devices:
+// Tool versions:
+// Description:
+//
+// Dependencies:
+//
+// Revision:
+// Revision 0.01 - File Created
+// Additional Comments:
+//
+//////////////////////////////////////////////////////////////////////////////////
+module W2(
+input clk,//时钟信号
+input reset,//重置
+input [1:0] SW,//开关
+output reg [15:0] led//16位输出用于控制LED灯
+);
+wire clk_2HZ;//用来接收Div模块生成的分频时钟信号
+reg [1:0] CZ;//用于存储上一次的开关状态
+
+Div F(reset,clk,clk_2HZ);//2Hz
+
+initial
+begin
+led<=16'b0;
+end
+
+always @(posedge reset or posedge clk_2HZ)//在reset上边沿或clk_2HZ上边沿触发
+begin
+    if(reset)//置零
+        begin
+        led<=16'b0;
+        end
+    else if(led==16'b0)//如果LED当前全部熄灭
+        begin
+            case(SW)
+            2'b00:begin led<=16'b1000000000000000;CZ<=SW;end//所有LED灯保持熄灭
+            2'b01:begin led<=16'b0000000000000001;CZ<=SW;end//只有最右边的LED灯亮
+            2'b10:begin led<=16'b0000000110000000;CZ<=SW;end//中间的两个LED灯亮
+            2'b11:begin led<=16'b1000000000000001;CZ<=SW;end//最左边和最右边的亮
+            endcase
+        end
+   else if(SW!=CZ)//检查当前的开关状态SW是否与前一次保存的状态CZ不同
+        begin
+            case(SW)
+            2'b00:begin led<=16'b1000000000000000;CZ<=SW;end//只有最左边的LED灯亮
+            2'b01:begin led<=16'b0000000000000001;CZ<=SW;end//只有最右边的LED灯亮
+            2'b10:begin led<=16'b0000000110000000;CZ<=SW;end//即中间的两个LED灯亮
+            2'b11:begin led<=16'b1000000000000001;CZ<=SW;end//最左边和最右边的LED灯亮
+            endcase
+        end
+    else
+        begin
+            case(SW)
+                2'b00:begin led[15:0] <= {led[0],led[15:1]};end//向右循环移位操作
+                2'b01:begin led[15:0] <= {led[14:0],led[15]};end//向左循环移位操作
+                2'b10:begin led[15:8] <= {led[14:8],led[15]};led[7:0] <= {led[0],led[7:1]};end//高8位执行向左循环移位,低8位执行向右循环移位
+                2'b11:begin led[15:8] <= {led[8],led[15:9]};led[7:0] <= {led[6:0],led[7]};end//高8位执行向右循环移位,低8位执行向左循环移位
+            endcase
+        end
+end
+endmodule
+
+//分频器
+module Div(
+input reset,//重置计数器和输出时钟状态
+input clk,//输入25MHz的时钟信号
+output reg clk_out//输出分频后时钟信号
+);
+
+reg [31:0] counter;//计数器
+initial
+begin
+counter<=32'd0;
+end
+
+initial
+begin
+clk_out=0;
+end
+
+always @(posedge reset or posedge clk)//在reset上边沿或clk上边沿触发
+begin
+    if(reset)//清零
+        begin
+        counter<=32'd0;
+        n_clk<=1'b0;
+        end
+    else
+        begin
+        if(counter==32'd12500000)
+            begin
+            n_clk<=~n_clk;//翻转时钟信号
+            counter<=32'd0;//计数重置为0
+            end
+        else//reset==0且还未到达翻转时刻
+            counter<=counter+1'b1;
+        end
+end
+endmodule

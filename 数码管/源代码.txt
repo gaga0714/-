@@ -1,0 +1,103 @@
+`timescale 1ns / 1ps
+//////////////////////////////////////////////////////////////////////////////////
+// Company:
+// Engineer:
+//
+// Create Date:    09:50:29 01/02/2024
+// Design Name:
+// Module Name:    W4
+// Project Name:
+// Target Devices:
+// Tool versions:
+// Description:
+//
+// Dependencies:
+//
+// Revision:
+// Revision 0.01 - File Created
+// Additional Comments:
+//
+//////////////////////////////////////////////////////////////////////////////////
+module Display(
+input clk,//时钟信号
+input [31:0] data,//32位被显示数据
+output reg [7:0] seg,//段选信号
+output reg [2:0] which=0//片选信号
+);
+
+//分频扫描
+reg [15:0] count=0;//扫描循环计数器
+
+//周期性更新每个数码管的显示
+always@(posedge clk)//时钟信号上边沿触发
+count<=count+1'b1;//计数器+1
+always@(negedge clk)
+if(&count)
+    which<=which+1'b1;//切换到下一片数码管
+
+reg [3:0] digit;//当前数码管显示数据
+//根据数码管的片选，对当前电亮的数码管赋予4位的当前显示数据
+always @*
+begin
+case(which)
+0:digit<=data[31:28];//片选信号AN7有效
+1:digit<=data[27:24];//片选信号AN6有效
+2:digit<=data[23:20];//片选信号AN5有效
+3:digit<=data[19:16];//片选信号AN4有效
+4:digit<=data[15:12];//片选信号AN3有效
+5:digit<=data[11:8];//片选信号AN2有效
+6:digit<=data[7:4];//片选信号AN1有效
+7:digit<=data[3:0];//片选信号AN0有效
+endcase
+end
+
+//设置7段LED对应数字（十六进制数码转换为段选信号）
+always @*
+begin
+case(digit)
+4'h0:seg<=8'b00000011;
+4'h1:seg<=8'b10011111;
+4'h2:seg<=8'b00100101;
+4'h3:seg<=8'b00001101;
+4'h4:seg<=8'b10011001;
+4'h5:seg<=8'b01001001;
+4'h6:seg<=8'b01000001;
+4'h7:seg<=8'b00011111;
+4'h8:seg<=8'b00000001;
+4'h9:seg<=8'b00001001;
+4'hA:seg<=8'b00010001;
+4'hB:seg<=8'b11000001;
+4'hC:seg<=8'b01100011;
+4'hD:seg<=8'b10000101;
+4'hE:seg<=8'b01100001;
+4'hF:seg<=8'b01110001;
+endcase
+end
+endmodule
+
+module W4(
+input clk,//时钟信号
+input [1:0] SW,//开关
+output wire [7:0] seg,//数码管段选信号
+output wire [2:0] which,//数码管片选信号
+output reg EN=1//通过控制译码器使能信号来控制数码管使能，默认开启数码管
+);
+
+reg [31:0] curdata;
+reg [31:0] data0=32'h12345678;
+reg [31:0] data1=32'h87654321;
+reg [31:0] data2=32'hABCDEF01;
+
+always@(*)
+begin
+case(SW)
+2'b00:EN<=0;
+2'b01:begin EN<=1;curdata<=data0;end
+2'b10:begin EN<=1;curdata<=data1;end
+2'b11:begin EN<=1;curdata<=data2;end
+endcase
+end
+
+Display display(clk,curdata,seg,which);//调用数码管显示模块
+endmodule
+

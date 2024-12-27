@@ -1,0 +1,64 @@
+`timescale 1ns / 1ps
+
+////////////////////////////////////////////////////////////////////////////////
+// Company:
+// Engineer:
+//
+// Create Date:   15:23:11 01/04/2024
+// Design Name:   W4
+// Module Name:   C:/gaga/work/real_shudian/W4/test.v
+// Project Name:  W4
+// Target Device:  
+// Tool versions:  
+// Description:
+//
+// Verilog Test Fixture created by ISE for module: W4
+//
+// Dependencies:
+//
+// Revision:
+// Revision 0.01 - File Created
+// Additional Comments:
+//
+////////////////////////////////////////////////////////////////////////////////
+
+module test;
+
+    // Inputs
+    reg clk;
+    reg [1:0] SW;
+
+    // Outputs
+    wire [7:0] seg;
+    wire [2:0] which;
+    wire EN;
+
+    // Instantiate the Unit Under Test (UUT)
+    W4 uut (
+        .clk(clk),
+        .SW(SW),
+        .seg(seg),
+        .which(which),
+        .EN(EN)
+    );
+
+initial begin
+// Initialize Inputs
+clk = 0;
+SW = 0;
+end
+always #5 clk=~clk;
+always @(posedge clk) begin
+SW = 2'b00;
+#5;
+SW = 2'b01;
+#20;
+SW = 2'b10;
+#20;
+SW = 2'b11;
+#20;
+$finish;
+end     
+endmodule
+
+

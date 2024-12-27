@@ -1,0 +1,26 @@
+
+# PlanAhead Generated IO constraints
+
+NET "SW[1]" PULLDOWN;
+NET "SW[0]" PULLDOWN;
+NET "SW[1]" IOSTANDARD = LVCMOS18;
+NET "SW[0]" IOSTANDARD = LVCMOS18;
+NET "clk" IOSTANDARD = LVCMOS18;
+NET "led" IOSTANDARD = LVCMOS18;
+NET "reset" IOSTANDARD = LVCMOS18;
+
+# PlanAhead Generated physical constraints
+
+NET "SW[0]" LOC = T3;
+NET "SW[1]" LOC = U3;
+NET "led" LOC = R1;
+INST "clk_BUFGP" LOC = H4;
+NET "clk" LOC = H4;
+
+# PlanAhead Generated IO constraints
+
+NET "reset" PULLDOWN;
+
+# PlanAhead Generated physical constraints
+
+NET "reset" LOC = R4;

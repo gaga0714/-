@@ -1,0 +1,58 @@
+`timescale 1ns / 1ps
+
+////////////////////////////////////////////////////////////////////////////////
+// Company:
+// Engineer:
+//
+// Create Date:   21:27:36 01/01/2024
+// Design Name:   W2
+// Module Name:   C:/gaga/work/real_shudian/W2/test.v
+// Project Name:  W2
+// Target Device:  
+// Tool versions:  
+// Description:
+//
+// Verilog Test Fixture created by ISE for module: W2
+//
+// Dependencies:
+//
+// Revision:
+// Revision 0.01 - File Created
+// Additional Comments:
+//
+////////////////////////////////////////////////////////////////////////////////
+
+module test;
+
+    // Inputs
+    reg clk;
+    reg reset;
+    reg [1:0] SW;
+
+    // Outputs
+    wire [15:0] led;
+
+    // Instantiate the Unit Under Test (UUT)
+    W2 uut (
+        .clk(clk),
+        .reset(reset),
+        .SW(SW),
+        .led(led)
+    );
+always #20 clk=~clk;
+    initial begin
+        // Initialize Inputs
+        clk = 0;
+        reset = 0;
+        SW = 00;   
+        #2000000000;
+        reset=0;SW=01;
+        #2000000000;
+        reset=1;SW=00;//重置到初始状态
+        #1000000000;
+        reset=0;SW=10;
+        #2000000000;
+        reset=0;SW=11;
+        #2000000000;
+    end
+endmodule

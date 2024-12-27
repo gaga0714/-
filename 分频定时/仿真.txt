@@ -1,0 +1,59 @@
+`timescale 1ns / 1ps
+
+////////////////////////////////////////////////////////////////////////////////
+// Company:
+// Engineer:
+//
+// Create Date:   19:40:22 01/01/2024
+// Design Name:   W1
+// Module Name:   C:/gaga/work/real_shudian/W1/test.v
+// Project Name:  W1
+// Target Device:  
+// Tool versions:  
+// Description:
+//
+// Verilog Test Fixture created by ISE for module: W1
+//
+// Dependencies:
+//
+// Revision:
+// Revision 0.01 - File Created
+// Additional Comments:
+//
+////////////////////////////////////////////////////////////////////////////////
+
+module test;
+
+    // Inputs
+    reg clk;
+    reg reset;
+    reg [1:0] SW;
+
+    // Outputs
+    wire led;
+
+    // Instantiate the Unit Under Test (UUT)
+    W1 uut (
+        .clk(clk),
+        .reset(reset),
+        .SW(SW),
+        .led(led)
+    );
+
+    always #20 clk=~clk;//每20个时间单位，时钟信号clk的值会翻转
+    initial begin
+        clk = 0;
+        reset = 0;
+        SW = 2'b00;
+        #2000000000;
+        reset=0;
+        SW=2'b01;
+        #1000000000;
+        reset=0;
+        SW=2'b10;
+        #1000000000;
+        reset=0;
+        SW=2'b11;
+    end
+endmodule
+

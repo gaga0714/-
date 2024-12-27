@@ -1,0 +1,111 @@
+`timescale 1ns / 1ps
+//////////////////////////////////////////////////////////////////////////////////
+// Company:
+// Engineer:
+//
+// Create Date:    15:09:48 01/01/2024
+// Design Name:
+// Module Name:    W1
+// Project Name:
+// Target Devices:
+// Tool versions:
+// Description:
+//
+// Dependencies:
+//
+// Revision:
+// Revision 0.01 - File Created
+// Additional Comments:
+//
+//////////////////////////////////////////////////////////////////////////////////
+module W1(
+input clk,//时钟信号
+input reset,//重置信号
+input [1:0] SW,//2位开关
+output reg led//控制LED
+);
+wire out1,out2,out3,out4;//用作子模块的输出连接到主模块的内部逻辑
+
+//实例化三个分频器模块和一个时钟模块
+Div d1(reset,clk,32'd25000000,out1);//0.5Hz
+Div d2(reset,clk,32'd12500000,out2);//1Hz
+Div d3(reset,clk,32'd6250000,out3);//2Hz
+Clock c(clk,reset,out4);
+
+always@(*)//在输入变化时重新评估
+begin
+    case(SW)
+        2'b00:led=out1;
+        2'b01:led=out2;
+        2'b10:led=out3;
+        2'b11:led=out4;
+    endcase
+end
+endmodule
+
+//分频模块
+module Div(
+input reset,//重置计数器和n_clk
+input o_clk,//原始时钟信号输入
+input [31:0] f,//32位输入，指定分频系数
+output reg n_clk//分频后的时钟信号
+);
+reg [31:0] counter;//用于计数
+
+initial
+    begin
+    counter<=32'd0;
+    end
+
+initial
+    begin
+    n_clk=0;
+    end
+
+always @(posedge reset or posedge o_clk)//在reset的上升沿或o_clk的上边沿触发
+begin
+    if(reset)//清零
+        begin
+        counter<=32'd0;
+        n_clk<=1'b0;
+        end
+    else
+        begin
+        if(counter==f)
+            begin
+            n_clk<=~n_clk;//翻转时钟信号
+            counter<=32'd0;//计数重置为0
+            end
+        else//reset==0且还未到达翻转时刻
+            counter<=counter+1'b1;
+        end
+end
+endmodule
+
+//定时模块
+module Clock(
+input clk,//时钟信号
+input reset,//重置计数器和LED状态
+output reg led//控制LED
+);
+reg [31:0] counter;//计数器
+initial counter<=32'd0;
+initial led<=0;
+
+always @(posedge clk or posedge reset)//始终在clk上边沿或reset上边沿触发
+begin
+    if(reset)//置零
+        begin
+        counter<=32'd0;
+        led<=1'b0;
+        end
+    else
+        begin
+        if(counter==32'd150000000)
+            led<=1'b1;
+        else
+            counter<=counter+1'b1;
+        end
+end
+endmodule
+
